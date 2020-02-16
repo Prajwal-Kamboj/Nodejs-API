@@ -1,0 +1,19 @@
+{
+  "name": "devcamper_api",
+  "version": "1.0.0",
+  "description": "dev camper api",
+  "main": "server.js",
+  "scripts": {
+    "start": " node server",
+    "dev": "nodemon server"
+  },
+  "author": "Prajwal Kamboj",
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^2.0.2"
+  },
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1"
+  }
+}
