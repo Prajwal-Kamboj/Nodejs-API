@@ -25,7 +25,7 @@ exports.getBootcamps = async (req,res,next)=>{
     querStr = queryStr.replace(/\b(gt|gte|lt|lte|in)\b/g, match => `$${match}`);
 
     // finding resource
-    query = Bootcamp.find(JSON.parse(queryStr));
+    query = Bootcamp.find(JSON.parse(queryStr)).populate('courses');
 
     // Select fields
     if(req.query.select){
@@ -45,7 +45,7 @@ exports.getBootcamps = async (req,res,next)=>{
 
     // Pagination
     const page = parseInt(req.query.page, 10) || 1;
-    const limit = parseInt(req.query.limit, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
     const startIndex = (page-1)*limit;
     const endIndex = page*limit;
     const total = await Bootcamp.countDocuments();
@@ -154,11 +154,22 @@ exports.updateBootcamp = async (req,res,next)=>{
 //@access   Private
 exports.deleteBootcamp = async (req,res,next)=>{
     try {
-        const bootcamp = await Bootcamp.findByIdAndDelete(req.params.id) ;
+        const bootcamp = await Bootcamp.findById(req.params.id) ;
+
+        if(!bootcamp){
+            return next(
+                new ErrorResponse(`Bootcamp not fount with id ${req.params.id}`,404)
+            );
+        }
+
+        bootcamp.remove();
+
 
         res.status(200).json({ success: true, data: bootcamp});
         
     } catch (err) {
-        res.status(400).json({success:false});
+        next(
+            new ErrorResponse(`Bootcamp not fount with id ${req.params.id}`,404)
+        );
     }
 }
