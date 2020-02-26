@@ -1,4 +1,5 @@
 const Bootcamp = require('../models/Bootcamp');
+const ErrorResponse = require ('../utils/errorResponse');
 
 
 
@@ -101,7 +102,10 @@ exports.getBootcamp = async (req,res,next)=>{
         }
         
     } catch (err) {
-        res.status(400).json({success:false });
+        // res.status(400).json({success:false });
+        next(
+            new ErrorResponse(`Bootcamp not found with id ${req.params.id}`, 404)
+        );
     }
    
 }
