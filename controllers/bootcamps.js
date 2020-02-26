@@ -6,8 +6,81 @@ const Bootcamp = require('../models/Bootcamp');
 // desc - Get all bootcamps
 //@route Get /api/v1/bootcamps
 //@access   Public
-exports.getBootcamps = (req,res,next)=>{
-    res.status(200).json({ success: true, msg: ' Show all bootcamps'});
+exports.getBootcamps = async (req,res,next)=>{
+    let query;
+    // copy req.query
+    const reqQuery = {...req.query};
+
+    // Fields to exclude
+    const removeFields = ['select','sort','page','limit'];
+
+    // Loop over removeFields and delete them from reqQuery
+    removeFields.forEach(param => delete reqQuery[param]);
+
+    // creqte query string
+    let queryStr = JSON.stringify(reqQuery);
+
+    //create ops like ($gt,$gte)
+    querStr = queryStr.replace(/\b(gt|gte|lt|lte|in)\b/g, match => `$${match}`);
+
+    // finding resource
+    query = Bootcamp.find(JSON.parse(queryStr));
+
+    // Select fields
+    if(req.query.select){
+        const fields = req.query.select.split(',').join(' ');
+        query = query.select(fields);
+    }
+
+    // Sort
+    if(req.query.sort){
+        const sortBy = req.query.sort.split(',').join(' ');
+        query = query.sort(sortBy);
+
+
+    }else{
+        query = query.sort('name');
+    }
+
+    // Pagination
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 1;
+    const startIndex = (page-1)*limit;
+    const endIndex = page*limit;
+    const total = await Bootcamp.countDocuments();
+
+    query = query.skip(startIndex).limit(limit);
+
+
+
+    //executing query
+    try {
+        const bootcamp = await query ;
+        
+
+        //pagination result
+        const pagination = {};
+        if(endIndex <total){
+            pagination.next = {
+                page: page+1,
+                limit
+            }
+        }
+
+        if(startIndex >0){
+            pagination.prev = {
+                page:page-1,
+                limit
+            }
+        }
+
+        res.status(200).json({ success: true,count:bootcamp.length, pagination, data: bootcamp});
+        
+    } catch (err) {
+        res.status(400).json({success:false});
+    }
+
+    
 
 }
 
@@ -15,8 +88,22 @@ exports.getBootcamps = (req,res,next)=>{
 // desc - Get single bootcamp
 //@route Get /api/v1/bootcamps/:id
 //@access   Public
-exports.getBootcamp = (req,res,next)=>{
-    res.status(200).json({ success: true, msg: `Show bootcamp ${req.params.id}`});
+exports.getBootcamp = async (req,res,next)=>{
+    try {
+        const bootcamp = await Bootcamp.findById(req.params.id) ;
+       
+        
+        if(!bootcamp){
+            res.status(400).json({success:false});
+        }
+        else{
+            res.status(200).json({ success: true,count:bootcamp.length, data: bootcamp});
+        }
+        
+    } catch (err) {
+        res.status(400).json({success:false });
+    }
+   
 }
 
 
@@ -43,13 +130,31 @@ exports.createBootcamp = async (req,res,next)=>{
 // desc - update bootcamp
 //@route PUT /api/v1/bootcamps/:id
 //@access   Private
-exports.updateBootcamp = (req,res,next)=>{
-    res.status(200).json({ success: true, msg: `Update bootcamp ${req.params.id}`});
+exports.updateBootcamp = async (req,res,next)=>{
+    
+      try {
+        const bootcamp = await Bootcamp.findByIdAndUpdate(req.params.id, req.body, {
+            new: true,
+            runValidators: true
+          });
+        
+          res.status(200).json({ success: true, data: bootcamp });
+        
+    } catch (err) {
+        res.status(400).json({success:false});
+    }
 }
 
 // desc - Delete bootcamp
 //@route DELETE /api/v1/bootcamps/:id
 //@access   Private
-exports.deleteBootcamp = (req,res,next)=>{
-    res.status(200).json({ success: true, msg: `Delete bootcamp ${req.params.id}`});
+exports.deleteBootcamp = async (req,res,next)=>{
+    try {
+        const bootcamp = await Bootcamp.findByIdAndDelete(req.params.id) ;
+
+        res.status(200).json({ success: true, data: bootcamp});
+        
+    } catch (err) {
+        res.status(400).json({success:false});
+    }
 }

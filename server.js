@@ -3,15 +3,18 @@ const dotenv = require ('dotenv');
 const morgan = require('morgan');
 const connectDB = require('./config/db')
 
+
 // load env 
 dotenv.config({path : './config/config.env'});
-
 //connect to db
 connectDB();
+
+
 
 const app = express();
 //route files
 const bootcamps = require('./routes/bootcamps');
+const courses = require('./routes/courses');
 
 // Body parser
 app.use(express.json());
@@ -19,8 +22,10 @@ app.use(express.json());
 
 
 
+
 // mount routers
 app.use('/api/v1/bootcamps', bootcamps);
+app.use('/api/v1/courses', courses);
 
 const PORT= process.env.PORT || 5000;
 
