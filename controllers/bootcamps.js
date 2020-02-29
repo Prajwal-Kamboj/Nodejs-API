@@ -124,7 +124,7 @@ exports.createBootcamp = async (req,res,next)=>{
         });
         
     } catch (err) {
-        res.status(400).json({success:false});
+        next(new ErrorResponse('Cannot create Bootcamp'),404);
     }
    
 };

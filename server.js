@@ -2,7 +2,8 @@ const express = require('express');
 const dotenv = require ('dotenv');
 const morgan = require('morgan');
 const errorHandler = require('./middleware/error');
-const connectDB = require('./config/db')
+const connectDB = require('./config/db');
+var cookieParser = require('cookie-parser');
 
 
 // load env 
@@ -23,6 +24,8 @@ const users = require('./routes/auth');
 // Body parser
 app.use(express.json());
 
+app.use(cookieParser());
+
 
 
 
@@ -31,6 +34,13 @@ app.use(express.json());
 app.use('/api/v1/bootcamps', bootcamps);
 app.use('/api/v1/courses', courses);
 app.use('/api/v1/auth', users);
+app.get('/', function (req, res) {
+    // Cookies that have not been signed
+    console.log('Cookies: ', req.cookies)
+   
+    // Cookies that have been signed
+    console.log('Signed Cookies: ', req.signedCookies)
+  });
 
 app.use(errorHandler);
 
