@@ -7,8 +7,10 @@ const connectDB = require('./config/db')
 
 // load env 
 dotenv.config({path : './config/config.env'});
+
+
 //connect to db
-// connectDB();
+connectDB();
 
 
 
